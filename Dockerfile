@@ -1,16 +1,21 @@
 FROM python:3.9-alpine3.16
 
-COPY requirements.txt /temp/requirements.txt
-COPY service /service
+# Install postgres and build dependencies
+RUN apk add --no-cache postgresql-client build-base postgresql-dev
+
+# Setup the working directory
 WORKDIR /service
-EXPOSE 8000
 
-RUN apk add postgresql-client build-base postgresql-dev
+# Install Python dependencies
+COPY requirements.txt /service/
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
-RUN  pip install --upgrade pip
+# Copy the project code
+COPY . /service
 
-RUN pip install -r /temp/requirements.txt
-
-RUN adduser --disabled-password service-user
-
+# Create a non-root user and switch to it
+RUN adduser --disabled-password --gecos '' service-user
 USER service-user
+
+# Expose the port the app runs on
+EXPOSE 8000

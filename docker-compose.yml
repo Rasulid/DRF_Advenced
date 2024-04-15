@@ -6,16 +6,15 @@ services:
       - "8000:8000"
     volumes:
       - ./service:/service
-
     environment:
       - DB_HOST=db
       - DB_NAME=dbname
       - DB_USER=user
       - DB_PASS=pass
-
     command: >
-      sh -c "python3 manage.py runserver 0.0.0.0:8000"
-
+      sh -c "python manage.py migrate &&
+             echo \"from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('root', 'root@root.com', 'root') if not User.objects.filter(username='root').exists() else None\" | python manage.py shell &&
+             python manage.py runserver 0.0.0.0:8000"
     depends_on:
       - db
 
@@ -25,3 +24,18 @@ services:
       - POSTGRES_DB=dbname
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=pass
+
+  redis:
+    image: redis:7.0-alpine
+    hostname: redis
+
+  worker:
+    build:
+      context: .
+    hostname: worker
+    entrypoint: ["celery"]
+    command: ["-A", "celery_app.app", "worker", "--loglevel=info"]
+    volumes:
+      - ./service:/service
+    depends_on:
+      - redis

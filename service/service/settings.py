@@ -136,7 +136,7 @@ LOGGING = {
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
-            'formatter': 'simple',  # You can customize the formatter as needed
+            'formatter': 'simple',
         }
     },
     'loggers': {

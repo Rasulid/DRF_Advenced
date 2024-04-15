@@ -1,4 +1,6 @@
 import os
+import time
+
 from celery import Celery
 from celery.utils.log import get_task_logger
 
@@ -18,7 +20,5 @@ logger = get_task_logger(__name__)
 
 @app.task
 def debug_task():
-    from datetime import datetime
-    current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    logger.info(f"Hello from debug at {current_time}")
-    return f'Hello from debug at {current_time}'
+    time.sleep(20)
+    print(f"Hello from debug")
